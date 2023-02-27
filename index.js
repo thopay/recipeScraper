@@ -48,21 +48,65 @@ const getName = (str) => {
 }
 
 const getDirections = (str) => {
-	const data = str.slice(str.indexOf("DIRECTIONS:") + "DIRECTIONS:".length + 1);
-	let directions = data.split('');
-	console.log([data]);
+	let data = str.slice(str.indexOf("DIRECTIONS:") + "DIRECTIONS:".length + 1);
+	data = data.replace(/\d+\n/, '');
+	let directions = data.split(/\n(?=[A-Z])/g);
+	for (let i = 0; i < directions.length; i++) {
+		directions[i] = directions[i].replaceAll('\n', ' ');
+		if (i == directions.length - 1) {
+			directions[i] = directions[i].replace(/\d+\s{2}/, ''); // Replace page number with 2 spaces
+			directions[i] = directions[i].replace(/\d+$/, ''); // Replace page number at end of string
+		}
+		directions[i] = directions[i].replace(/\s+/g, " ").trim(); // Strip extra whitespace
+	}
+	return directions;
+}
+
+const outputRecipes = (recipes) => {
+	for (let i = 0; i < recipes.length; i++) {
+		let ingredientStr = ``;
+		for (const [key, value] of Object.entries(recipes[i].ingredients)) {
+			ingredientStr += `- ${value} ${key}\n`;
+		}
+		let directionStr = ``; 
+		for (let j = 0; j < recipes[i].directions.length; j++) {
+			directionStr += `${j + 1}. ${recipes[i].directions[j]}\n`;
+		}
+		const markdown = `Home: [[🏠 Recipes]]
+Tags: 
+References: 
+
+## Macros
+##### Calories: ${recipes[i].macros["Calories:"]}
+##### Protein: ${recipes[i].macros["Protein:"]}
+##### Carbs: ${recipes[i].macros["Carbohydrates:"]}
+##### Fats: ${recipes[i].macros["Fat:"]}
+##### Fiber: ${recipes[i].macros["Fiber:"]}
+
+## Ingredients
+${ingredientStr}
+## Cooking
+${directionStr}
+## Serving
+- 
+
+## Notes
+- `
+		fs.writeFileSync(`./recipes/${recipes[i].name}.md`, markdown);
+	}
 }
 
 pdf(dataBuffer).then(function(data) {
 	recipes = data.text.split(/INGREDIENTS:MACROS:(.*?)(?:INGREDIENTS:MACROS|$)/gms).filter(e => e.length > 0);
 	const recipeBook = [];
-	getDirections(recipes[1]);
 	for (let i = 0; i < recipes.length; i++) {
 		recipeBook.push({
 			name: getName(recipes[i]),
 			ingredients: getIngredients(recipes[i]),
-			macros: getMacros(recipes[i])
+			macros: getMacros(recipes[i]),
+			directions: getDirections(recipes[i])
 		});
 	}
-	//console.log(recipeBook);
+	outputRecipes(recipeBook);
+	console.log(`Done: Created ${recipeBook.length} recipes.`)
 });
