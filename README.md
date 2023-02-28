@@ -43,8 +43,9 @@ I was inspired to create this because I've been building my Obisdian Vault and w
 
 ### Demo
 
-<img src="https://user-images.githubusercontent.com/60588709/221759212-f8004e5a-79b2-4bf7-ac87-59afe8ed7508.gif" width="100%">
 
+
+https://user-images.githubusercontent.com/60588709/221901590-2a680cee-7ee7-4719-b8b2-3326fa8efa4e.mp4
 
 
 ### Built With
